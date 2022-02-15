@@ -21,7 +21,7 @@ wss.on("connection", (socket) => {
     console.log("Disconnected from the Browser ❌");
   });
   socket.on("message", (message) => {
-    console.log(message);
+    console.log(message.toString('utf8'));
   });
   socket.send("hello!!@");
 });
