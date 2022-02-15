@@ -16,7 +16,12 @@ const httpServer = http.createServer(app);
 const ioServer = new Server(httpServer);
 
 ioServer.on("connection", socket => {
-  console.log(socket);
+  socket.on("enter_room", (msg, done) => {
+    console.log(msg);
+    setTimeout(() => {
+      done();
+    }, 10_000);
+  });
 });
 
 // const sockets = [];
