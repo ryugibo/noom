@@ -15,6 +15,16 @@ const handleListen = () => console.log(`Listening on http://localhost:3000`);
 const httpServer = http.createServer(app);
 const ioServer = new Server(httpServer);
 
+function publicRoom() {
+  const { sockets: { adapter: { sids, rooms }}} = ioServer
+  const publicRooms = [];
+  room.forEach((_, key) => {
+    if (sids.get(key) === undefined) {
+      publicRooms.push(key);
+    }
+  });
+  return publicRooms;
+}
 ioServer.on("connection", socket => {
   socket["nickname"] = "Anonymous";
   socket.onAny((event) => {
