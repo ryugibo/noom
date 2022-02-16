@@ -25,13 +25,6 @@ function handleMessageSubmit(event) {
   input.value = "";
 }
 
-function handleNicknameSubmit(event) {
-  event.preventDefault();
-  const input = room.querySelector("#name input");
-  socket.emit("nickname", input.value);
-  input.value = "";
-}
-
 function showRoom() {
   welcome.hidden = true;
   room.hidden = false;
@@ -39,15 +32,14 @@ function showRoom() {
   h3.innerText = `Room ${roomName}`;
   const msgForm = room.querySelector("#msg");
   msgForm.addEventListener("submit", handleMessageSubmit);
-  const nameForm = room.querySelector("#name");
-  nameForm.addEventListener("submit", handleNicknameSubmit);
 }
 function handleRoomSubmit(event) {
   event.preventDefault();
-  const input = form.querySelector("input");
-  socket.emit("enter_room", input.value, showRoom);
-  roomName = input.value;
-  input.value = "";
+  const roomInput = form.querySelector("#roomname");
+  roomName = roomInput.value;
+  const nameInput = form.querySelector("#nickname");
+  socket.emit("enter_room", roomName, nameInput.value, showRoom);
+  roomInput.value = "";
 }
 
 form.addEventListener("submit", handleRoomSubmit);
