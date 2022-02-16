@@ -18,7 +18,7 @@ const ioServer = new Server(httpServer);
 function publicRoom() {
   const { sockets: { adapter: { sids, rooms }}} = ioServer
   const publicRooms = [];
-  room.forEach((_, key) => {
+  rooms.forEach((_, key) => {
     if (sids.get(key) === undefined) {
       publicRooms.push(key);
     }
@@ -35,9 +35,13 @@ ioServer.on("connection", socket => {
     socket.join(roomName);
     done();
     socket.to(roomName).emit("welcome", socket.nickname);
+    ioServer.sockets.emit("room_change", publicRoom());
   });
   socket.on("disconnecting", () => {
     socket.rooms.forEach((room) => socket.to(room).emit("bye", socket.nickname));
+  });
+  socket.on("disconnect", () => {
+    ioServer.sockets.emit("room_change", publicRoom());
   });
   socket.on("new_message", (msg, room, done) => {
     socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
