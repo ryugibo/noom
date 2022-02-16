@@ -16,11 +16,12 @@ const httpServer = http.createServer(app);
 const ioServer = new Server(httpServer);
 
 ioServer.on("connection", socket => {
-  socket.on("enter_room", (msg, done) => {
-    console.log(msg);
-    setTimeout(() => {
-      done();
-    }, 10_000);
+  socket.onAny((event) => {
+    console.log(`Socket Event:${event}`);
+  })
+  socket.on("enter_room", (roomName, done) => {
+    socket.join(roomName);
+    done();
   });
 });
 
