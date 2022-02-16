@@ -25,6 +25,11 @@ function publicRoom() {
   });
   return publicRooms;
 }
+
+function countRoom(roomName) {
+  return ioServer.sockets.adapter.rooms.get(roomName)?.size;
+}
+
 ioServer.on("connection", socket => {
   socket["nickname"] = "Anonymous";
   socket.onAny((event) => {
@@ -34,11 +39,11 @@ ioServer.on("connection", socket => {
     socket["nickname"] = (nickname === "") ? "Anonymous" : nickname;
     socket.join(roomName);
     done();
-    socket.to(roomName).emit("welcome", socket.nickname);
+    socket.to(roomName).emit("welcome", socket.nickname, countRoom(roomName));
     ioServer.sockets.emit("room_change", publicRoom());
   });
-  socket.on("disconnecting", () => {
-    socket.rooms.forEach((room) => socket.to(room).emit("bye", socket.nickname));
+  socket.on("disconnecting", (room) => {
+    socket.rooms.forEach((room) => socket.to(room).emit("bye", socket.nickname, countRoom(room) - 1));
   });
   socket.on("disconnect", () => {
     ioServer.sockets.emit("room_change", publicRoom());
