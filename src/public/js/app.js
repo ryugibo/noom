@@ -8,6 +8,13 @@ room.hidden = true;
 
 let roomName;
 
+function addMessage(mssage) {
+  const ul = room.querySelector("ul");
+  const li = document.createElement("li");
+  li.innerText = mssage;
+  ul.appendChild(li);
+}
+
 function showRoom() {
   welcome.hidden = true;
   room.hidden = false;
@@ -21,4 +28,9 @@ function handleRoomSubmit(event) {
   roomName = input.value;
   input.value = "";
 }
+
 form.addEventListener("submit", handleRoomSubmit);
+
+socket.on("welcome", () => {
+  addMessage("Someone joined!");
+});
