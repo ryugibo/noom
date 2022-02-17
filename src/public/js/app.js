@@ -25,11 +25,11 @@ function handleMessageSubmit(event) {
   input.value = "";
 }
 
-function showRoom() {
+function showRoom(memberCount) {
   welcome.hidden = true;
   room.hidden = false;
   const h3 = room.querySelector("h3");
-  h3.innerText = `Room ${roomName}`;
+  h3.innerText = `Room ${roomName} (${memberCount})`;
   const msgForm = room.querySelector("#msg");
   msgForm.addEventListener("submit", handleMessageSubmit);
 }
@@ -66,7 +66,17 @@ socket.on("room_change", (rooms) => {
   }
   rooms.forEach(room => {
     const li = document.createElement("li");
-    li.innerText = room
+    {
+      button = document.createElement("button");
+      {
+        button.innerText = room;
+        button.addEventListener("click", () => {
+          const roomInput = form.querySelector("#roomname");
+          roomInput.value = room;
+        });
+      }
+      li.appendChild(button);
+    }
     roomList.appendChild(li);
   })
 });

@@ -42,14 +42,17 @@ function countRoom(roomName) {
 
 ioServer.on("connection", socket => {
   socket["nickname"] = "Anonymous";
+  socket.emit("room_change", publicRoom());
+
   socket.onAny((event) => {
     console.log(`Socket Event:${event}`);
   })
   socket.on("enter_room", (roomName, nickname, done) => {
     socket["nickname"] = (nickname === "") ? "Anonymous" : nickname;
     socket.join(roomName);
-    done();
-    socket.to(roomName).emit("welcome", socket.nickname, countRoom(roomName));
+    const userCount = countRoom(roomName);
+    done(userCount);
+    socket.to(roomName).emit("welcome", socket.nickname, userCount);
     ioServer.sockets.emit("room_change", publicRoom());
   });
   socket.on("disconnecting", (room) => {
