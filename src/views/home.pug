@@ -6,6 +6,7 @@ html(lang="en")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title Noom
     link(rel="stylesheet", href="https://unpkg.com/mvp.css")
+    link(rel="stylesheet", href="/public/css/styles.css")
   body
     header
       h1 Noom
@@ -16,11 +17,27 @@ html(lang="en")
           button Enter room
       div#call
         div#myStream
-          video#myFace(autoplay, playsinline, width=400, height=400)
-          button#mute Mute
-          button#camera Turn Camera Off
-          select#cameras
-          video#peerFace(autoplay, playsinline, width=400, height=400)
+          section
+            header
+              video#selectedFace(autoplay, playsinline, width=800, height=800)
+              br
+              button#mute Mute
+              button#camera Turn Camera Off
+              select#cameras
+            aside
+              h3 Select a camera to scale up
+              div
+                video#myFace(class="selected" autoplay, playsinline, width=120, height=120)
+                span(style="vertical-align: middle;") Your Camera
+              div
+                video#peerFace(autoplay, playsinline, width=120, height=120)
+                span(style="vertical-align: middle;") Other Camera
+            aside
+              form#chat
+                div(style="overflow-y: scroll; height:400px;")
+                  section#list
+                input(placeholder="input chat")
+          
     script(src="/socket.io/socket.io.js")
     script(src="/public/js/app.js")
     

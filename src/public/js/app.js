@@ -1,6 +1,8 @@
 const socket = io();
 
 const myFace = document.getElementById("myFace");
+const peerFace = document.getElementById("peerFace");
+const selectedFace = document.getElementById("selectedFace");
 const muteBtn = document.getElementById("mute");
 const cameraBtn = document.getElementById("camera");
 const cameraSelect = document.getElementById("cameras");
@@ -9,6 +11,7 @@ const call = document.getElementById("call");
 
 call.hidden = true;
 
+let isSelectMy = true;
 let myStream;
 let muted = false;
 let cameraOff = false;
@@ -49,6 +52,11 @@ async function getMedia(deviceId) {
       deviceId ? cameraConstraints : initialConstraints
     );
     myFace.srcObject = myStream;
+    updateSelectedFace();
+    myFace.addEventListener("click", () => {
+      isSelectMy = true;
+      updateSelectedFace();
+    });
     if (!deviceId) {
       await getCameras();
     }
@@ -57,6 +65,19 @@ async function getMedia(deviceId) {
   }
 }
 
+function updateSelectedFace() {
+  if (isSelectMy) {
+    console.log("SetMy");
+    selectedFace.srcObject = myFace.srcObject;
+    myFace.classList.add("selected");
+    peerFace.classList.remove("selected");
+  } else {
+    console.log("SetPeer");
+    selectedFace.srcObject = peerFace.srcObject;
+    peerFace.classList.add("selected");
+    myFace.classList.remove("selected");
+  }
+}
 function handleMuteClick() {
   muted = !muted;
   myStream.getAudioTracks().forEach(track => track.enabled = !muted);
@@ -116,11 +137,38 @@ async function handleWelcomeSubmit(event) {
 
 welcomeForm.addEventListener("submit", handleWelcomeSubmit);
 
+// Chat
+
+const chatForm = document.getElementById("chat");
+const chatList = chatForm.querySelector("#list");
+const chatInput = chatForm.querySelector("input");
+
+function addChatText(isMy, text) {
+  const aside = document.createElement("aside");
+  aside.innerText = `${isMy ? "You" : "Other"}: ${text}`;
+  aside.classList.add(isMy ? "my" : "other");
+  chatList.appendChild(aside);
+  aside.scrollIntoView({block: "nearest", inline: "nearest"});
+}
+
+chatForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const chatValue = chatInput.value;
+  myDataChannel.send(chatValue);
+  addChatText(true, chatValue);
+  chatInput.value = "";
+});
+
 // Socket Code
+
+function handleMessageData(data) {
+  addChatText(false, data.data);
+  console.log("Data >> ", data.data);
+}
 
 socket.on("welcome", async () => {
   myDataChannel = myPeerConnection.createDataChannel("chat");
-  myDataChannel.addEventListener("message", console.log);
+  myDataChannel.addEventListener("message", handleMessageData);
   const offer = await myPeerConnection.createOffer();
   myPeerConnection.setLocalDescription(offer);
   socket.emit("offer", offer, roomName);
@@ -130,8 +178,8 @@ socket.on("welcome", async () => {
 socket.on("offer", async (offer) => {
   console.log("received the offer");
   myPeerConnection.addEventListener("datachannel", (data) => {
-    myDataChannel = event.channel;
-    myDataChannel.addEventListener("message", console.log);
+    myDataChannel = data.channel;
+    myDataChannel.addEventListener("message", handleMessageData);
   });
   myPeerConnection.setRemoteDescription(offer);
   const answer = await myPeerConnection.createAnswer();
@@ -181,6 +229,9 @@ function handleIce(data) {
 
 function handleAddStream(data) {
   console.log(data.streams);
-  const peerFace = document.getElementById("peerFace");
+  peerFace.addEventListener("click", () => {
+    isSelectMy = false;
+    updateSelectedFace();
+  });
   peerFace.srcObject = data.streams[0];
 }
